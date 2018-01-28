@@ -1,0 +1,789 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="log," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="最近由于个人所负责的模块的不确定性，需要预埋大量的日志以便更精准地分析和定位问题、同时升级项目中原有的日志系统的需求又刚好提上了日程，于是通过和同事的几天调研，最终将公司App的日志系统替换为了微信开源的Mars-xlog组件，关于xlog的优势和使用方式可直接参见其[官方Github](https://github.com/Tencent/mars/tree/master/mars/log)，这">
+<meta name="keywords" content="log">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用sublime提升mars-xlog日志文件分析效率">
+<meta property="og:url" content="http://yoursite.com/2017/08/06/Use sublime to enhance the efficiency of analyzing mars-xlog log files/index.html">
+<meta property="og:site_name" content="林江的笔记">
+<meta property="og:description" content="最近由于个人所负责的模块的不确定性，需要预埋大量的日志以便更精准地分析和定位问题、同时升级项目中原有的日志系统的需求又刚好提上了日程，于是通过和同事的几天调研，最终将公司App的日志系统替换为了微信开源的Mars-xlog组件，关于xlog的优势和使用方式可直接参见其[官方Github](https://github.com/Tencent/mars/tree/master/mars/log)，这">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://note.youdao.com/yws/api/personal/file/WEB06c09e65828a99e4080f24621c08cd95?method=download&shareKey=41254dace5879db69c65ad295eb7a0d4">
+<meta property="og:updated_time" content="2018-01-28T08:57:59.058Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用sublime提升mars-xlog日志文件分析效率">
+<meta name="twitter:description" content="最近由于个人所负责的模块的不确定性，需要预埋大量的日志以便更精准地分析和定位问题、同时升级项目中原有的日志系统的需求又刚好提上了日程，于是通过和同事的几天调研，最终将公司App的日志系统替换为了微信开源的Mars-xlog组件，关于xlog的优势和使用方式可直接参见其[官方Github](https://github.com/Tencent/mars/tree/master/mars/log)，这">
+<meta name="twitter:image" content="http://note.youdao.com/yws/api/personal/file/WEB06c09e65828a99e4080f24621c08cd95?method=download&shareKey=41254dace5879db69c65ad295eb7a0d4">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/08/06/Use sublime to enhance the efficiency of analyzing mars-xlog log files/"/>
+
+
+  <title> 使用sublime提升mars-xlog日志文件分析效率 | 林江的笔记 </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">林江的笔记</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                使用sublime提升mars-xlog日志文件分析效率
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-08-06T23:50:00+08:00" content="2017-08-06">
+              2017-08-06
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/工具插件/" itemprop="url" rel="index">
+                    <span itemprop="name">工具插件</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/08/06/Use sublime to enhance the efficiency of analyzing mars-xlog log files/" class="leancloud_visitors" data-flag-title="使用sublime提升mars-xlog日志文件分析效率">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近由于个人所负责的模块的不确定性，需要预埋大量的日志以便更精准地分析和定位问题、同时升级项目中原有的日志系统的需求又刚好提上了日程，于是通过和同事的几天调研，最终将公司App的日志系统替换为了微信开源的Mars-xlog组件，关于xlog的优势和使用方式可直接参见其<a href="https://github.com/Tencent/mars/tree/master/mars/log" target="_blank" rel="noopener">官方Github</a>，这里仅记录拿到收集的日志文件后，如何提升对日志的分析的效率的小技巧。</p>
+<p>参考Android Studio的Logcat，结合xlog文件的特性，以最省心和高效的方式来看，可优化的方面包括：自动化解压和打开、语法高亮两方面。</p>
+<h2 id="自动化解压和打开-open-build"><a href="#自动化解压和打开-open-build" class="headerlink" title="自动化解压和打开(open-build)"></a>自动化解压和打开(open-build)</h2><p>xlog在异步模式下会自动开启内容压缩，若直接打开，看到的将全是16进制的数字，所以微信提供了脚本<code>decode_mars_log_file.py</code>来解压，我们所需要做的首先是打开终端，cd到对应的路径，执行<code>python decode_mars_log_file.py xxx.xlog命令</code>以生成最终的xxx.xlog.log文件，然后再打开文件……，作为开发，怎能忍受这么麻烦的操作存在，这里就需要抡起sublime了。</p>
+<blockquote>
+<p>小技巧：.log的文件默认是以“控制台”程序打开，可以通过<code>“右键 - 显示简介 - 打开方式 - 选择‘sublime’ - 全部更改”</code>的方法修改默认配置。</p>
+</blockquote>
+<p>总所周知，sublime可以编辑和编译大部分主流的编程语言文件(js、java、php……)，这得益于其强大的构建系统(build system)的自定义，因此这里利用该方案来“build”我们的xlog文件。打开sublime，选择 <code>工具栏 - tool - Build System - New Build System</code>来为xlog文件配置构建方案。在弹出的新文件编辑窗口中填写以下内容即可：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;cmd&quot;: [&quot;$packages/User/decode_mars_log_file.py&quot;, &quot;$file&quot;],</span><br><span class="line">	&quot;selector&quot;: &quot;source.xlog&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后保存为例如<code>SampleXlog.sublime-build</code>。</p>
+<blockquote>
+<p>关于如何编写这些配置，具体可以参考sublime官方文档-<a href="http://sublime-text.readthedocs.io/en/latest/reference/build_systems.html#id1" target="_blank" rel="noopener">Build System章节【译】</a></p>
+</blockquote>
+<p>由于sublime本身对python的支持，所以我们可以直接指定相应的参数。</p>
+<ul>
+<li>其中cmd的值的第一个元素表示前面提到的用于解压缩的脚本的路径，<code>$packages</code>变量表示sublime本地的Packages路径，因此这里第二个步骤就是将<code>decode_mars_log_file.py</code>文件copy到上述路径下；  </li>
+<li>第二个元素变量表示当前文件，如果当前窗口是打开的xlog文件，<code>$file</code>就表示它。<br>另外还有个selector，我们稍后再解释。</li>
+</ul>
+<p>完成上述步骤后如果我们直接选中SampleXlog并点击Build，我们会发现在本地文件系统打开的xlog文件旁边生成了解压缩后的文件<code>xxx.xlog.log</code>，但是……这并没有什么*用，讲了大半天就给看这个？</p>
+<p>其实很容易就可以给出解决方案：只要将其解压后的内容的存放位置从原来生成的新文件修改为源文件本身，就可以实现“open-build”，对于解压前的内容，我们本身就不关心。因此，打开<code>decode_mars_log_file.py</code>文件，修改其main方法，将传入ParseFile的第二个参数修改为第一个参数一样的值：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">def main(args):</span><br><span class="line">    global lastseq</span><br><span class="line">    if 1==len(args):</span><br><span class="line">        if os.path.isdir(args[0]):</span><br><span class="line">            filelist = glob.glob(args[0] + &quot;/*.xlog&quot;)</span><br><span class="line">            for filepath in filelist:</span><br><span class="line">                lastseq = 0</span><br><span class="line">                ParseFile(filepath, filepath)</span><br><span class="line">        else: ParseFile(args[0], args[0]) #这里   </span><br><span class="line">    elif 2==len(args):</span><br><span class="line">        ParseFile(args[0], args[1]) #这里手动指定了存放文件，就不修改了 （虽然并不会走到这里）  </span><br><span class="line">    else: </span><br><span class="line">        filelist = glob.glob(&quot;*.xlog&quot;)</span><br><span class="line">        for filepath in filelist:</span><br><span class="line">            lastseq = 0</span><br><span class="line">            ParseFile(filepath, filepath) #这里（虽然并不会走到这里）</span><br></pre></td></tr></table></figure></p>
+<p>到这里，我们再重试手动Build，解压的内容便成功地覆盖了先前那不知所云的内容。但是密密麻麻的一大片白色字符，眼睛开始痛了起来。在logcat中的红黄蓝绿等所标识的VIDWEF等级显得多么的美丽。</p>
+<h2 id="语法高亮"><a href="#语法高亮" class="headerlink" title="语法高亮"></a>语法高亮</h2><p>不用刻意注意就知道sublime在打开的例如js、Java等文件时，会自动对相关关键字、方法变量等进行颜色区分，或者直接说语法高亮，其中的原因便是sublime内置了对这些语言的高亮配置方案，因此我们还是可以以为xlog配置build方案的模式来同样为xlog配置“语法高亮”方案。</p>
+<p>在sublime中，每种语法的高亮配置是以xml格式的内容组成，而为了更方便的制作高亮配置，已经有前人提供了相应方案，例如sublime的PackageDev插件，以更直观的方式进行编辑。安装好之后，点击<code>“工具栏 - tool - Packages - Package Development - Syntax Definition”</code>来为xlog文件指定高亮方案。如下所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># [PackageDev] target_format: plist, ext: tmLanguage</span><br><span class="line">---</span><br><span class="line">name: Codoon Xlog</span><br><span class="line">scopeName: source.xlog</span><br><span class="line">fileTypes: [&quot;xlog&quot;, &quot;xlog.log&quot;]</span><br><span class="line">uuid: af21ab18-b1b3-4929-8999-2654833418f4</span><br><span class="line"></span><br><span class="line">patterns:</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>name：表示该方案的名称，随意；</li>
+<li>scopeName：这个字段很重要了，可以将其理解为一套“语法方案”，注意将其与下面的fileTypes区分开来，还记得前面在为xlog配置build方案时忽略了一个selector属性吗，这下应该明白了，也就是说，如果发现该文件内容是xlog“语法方案”，那么就sublime就会自动将其build方案指定为<code>SampleXlog</code>；</li>
+<li>fileTypes：大概跟文件类型通配符类似，这里指定了只要文件名是以xlog、xlog.log形式结尾的，都将适用于本方案；</li>
+<li>uuid：自动生成，勿删除；</li>
+</ul>
+<p>接下来最重要的就是这个patterns了，如需详细了解，请自行参考<a href="http://www.sublimetext.com/docs/3/syntax.html" target="_blank" rel="noopener">官方文档</a>，可以以一句大白话概括：用正则匹配语句并指定高亮模式，每一种高亮模式在不同的主题中都有对应的颜色，具体颜色可以访问<a href="http://tmtheme-editor.herokuapp.com/#!/editor/theme/Monokai" target="_blank" rel="noopener">自定义sublime主题颜色-Sublime Color Editor网站</a>。那么有了这些基础了解，xlog的高亮方案也就可以很简单的匹配出来了：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">patterns:</span><br><span class="line">- comment: others</span><br><span class="line">  name: comment</span><br><span class="line">  match: (\^|d|g|M|l).*</span><br><span class="line"></span><br><span class="line">- comment: verbose</span><br><span class="line">  name: variable</span><br><span class="line">  match: (\[V])(\[.*?])(\[.*?])(\[.*?])(\[.*?])(\[.*)</span><br><span class="line">  captures:</span><br><span class="line">    &apos;1&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;2&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;3&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;4&apos;: &#123;name: string&#125;</span><br><span class="line">    &apos;5&apos;: &#123;name: constant.numeric&#125;</span><br><span class="line"></span><br><span class="line">- comment: debug</span><br><span class="line">  name: support.function</span><br><span class="line">  match: (\[D])(\[.*?])(\[.*?])(\[.*?])(\[.*?])(\[.*)</span><br><span class="line">  captures:</span><br><span class="line">    &apos;1&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;2&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;3&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;4&apos;: &#123;name: string&#125;</span><br><span class="line">    &apos;5&apos;: &#123;name: constant.numeric&#125;</span><br><span class="line"></span><br><span class="line">- comment: info </span><br><span class="line">  name: entity.name.function</span><br><span class="line">  match: (\[I])(\[.*?])(\[.*?])(\[.*?])(\[.*?])(\[.*)</span><br><span class="line">  captures:</span><br><span class="line">    &apos;1&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;2&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;3&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;4&apos;: &#123;name: string&#125;</span><br><span class="line">    &apos;5&apos;: &#123;name: constant.numeric&#125;</span><br><span class="line"></span><br><span class="line">- comment: warn</span><br><span class="line">  name: variable.parameter</span><br><span class="line">  match: (\[W])(\[.*?])(\[.*?])(\[.*?])(\[.*?])(\[.*)</span><br><span class="line">  captures:</span><br><span class="line">    &apos;1&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;2&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;3&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;4&apos;: &#123;name: string&#125;</span><br><span class="line">    &apos;5&apos;: &#123;name: constant.numeric&#125;</span><br><span class="line"></span><br><span class="line">- comment: error</span><br><span class="line">  name: keyword.other</span><br><span class="line">  match: (\[E])(\[.*?])(\[.*?])(\[.*?])(\[.*?])(\[.*)</span><br><span class="line">  captures:</span><br><span class="line">    &apos;1&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;2&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;3&apos;: &#123;name: comment&#125;</span><br><span class="line">    &apos;4&apos;: &#123;name: string&#125;</span><br><span class="line">    &apos;5&apos;: &#123;name: constant.numeric&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中</p>
+<ul>
+<li>comment相当于注释；</li>
+<li>name表示该套模式的名字；</li>
+<li>match该套模式的正则表达式，入门正则，可以看看<a href="https://deerchao.net/tutorials/regex/regex.htm" target="_blank" rel="noopener">这一篇</a>；</li>
+<li>captures是可选的，是对match粒度的进一步细分；</li>
+</ul>
+<p>保存后，还需要执行build将这种编写方式转化为sublime的格式，最后大功告成，看看效果：<img src="http://note.youdao.com/yws/api/personal/file/WEB06c09e65828a99e4080f24621c08cd95?method=download&amp;shareKey=41254dace5879db69c65ad295eb7a0d4" alt="image"></p>
+<h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2><p>虽然sublime自带强大的搜索/过滤，但以用途和方便而言，这里还是推荐一下<a href="https://github.com/davidpeckham/sublime-filterlines" target="_blank" rel="noopener">Filter Lines插件</a>，可以更好地帮助日志的粗分，最重要的是可以以<strong>行</strong>为单位进行过滤。</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>最后来总结一下，本文方案其实就是利用sublime的特性，通过将xlog文件当作一种“语言”的方式来为其配置自定义的“语法高亮”规则和“编译”规则，实现了xlog文件的快速解压和查看，极大的提升了日志分析的效率；使用方式也非常方便，直接双击xlog在sublime中打开，然后快捷键F7或command+B执行加压缩，便得到了形如logcat的日志内容。</p>
+<p>另外，需要说明的有两点：</p>
+<ol>
+<li>本文所使用的xlog未修改源码，其余压缩方案、加密解密、自定义格式化等修改请自行参考；</li>
+<li>本文所涉及的路径描述、生产环境均基于mac，其它系统请自行参考。</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/log/" rel="tag">#log</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/27/Touch summary and critical details of custom-event/" rel="next" title="Touch事件概述及自定义事件处理的被忽视的重要细节">
+                <i class="fa fa-chevron-left"></i> Touch事件概述及自定义事件处理的被忽视的重要细节
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/my_avatar.jpg"
+               alt="林江" />
+          <p class="site-author-name" itemprop="name">林江</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/whataa" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://sighttp.qq.com/msgrd?v=3&uin=837979117&site=&menu=yes" target="_blank" title="QQ">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  QQ
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#自动化解压和打开-open-build"><span class="nav-number">1.</span> <span class="nav-text">自动化解压和打开(open-build)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#语法高亮"><span class="nav-number">2.</span> <span class="nav-text">语法高亮</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它"><span class="nav-number">3.</span> <span class="nav-text">其它</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后"><span class="nav-number">4.</span> <span class="nav-text">最后</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">林江</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<span id="busuanzi_container_site_pv">
+    &nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;总访问: <span id="busuanzi_value_site_pv"></span>次
+</span>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+    
+  
+
+ 
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2141965"></script>
+      <!-- UY END -->
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("lTrcHfqk0M08SqMAmNgd7tOc-gzGzoHsz", "yazrWiRSI4OOHXlGROJalqBk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+
+  
+
+
+</body>
+</html>

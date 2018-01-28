@@ -1,0 +1,775 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ClassLoader,Hotfix&Plugin," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="Java中每一个类都是通过ClassLoader来加载的。对于基于Java的Android应用，这些ClassLoader是从哪来的呢。研究过Android插件化机制的都知道Android中有PathClassLoader和DexClassLoader这两个类，它们的概念和区别也许我们已经很熟悉了，但是对为什么应用的类加载器是PathClassLoader，它是如何产生的这些问题却是不甚了解。本文">
+<meta name="keywords" content="ClassLoader,Hotfix&amp;Plugin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="App&#39;s ClassLoader的来源">
+<meta property="og:url" content="http://yoursite.com/2016/10/31/App's ClassLoader的来源/index.html">
+<meta property="og:site_name" content="林江的笔记">
+<meta property="og:description" content="Java中每一个类都是通过ClassLoader来加载的。对于基于Java的Android应用，这些ClassLoader是从哪来的呢。研究过Android插件化机制的都知道Android中有PathClassLoader和DexClassLoader这两个类，它们的概念和区别也许我们已经很熟悉了，但是对为什么应用的类加载器是PathClassLoader，它是如何产生的这些问题却是不甚了解。本文">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-01-28T08:57:59.055Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="App&#39;s ClassLoader的来源">
+<meta name="twitter:description" content="Java中每一个类都是通过ClassLoader来加载的。对于基于Java的Android应用，这些ClassLoader是从哪来的呢。研究过Android插件化机制的都知道Android中有PathClassLoader和DexClassLoader这两个类，它们的概念和区别也许我们已经很熟悉了，但是对为什么应用的类加载器是PathClassLoader，它是如何产生的这些问题却是不甚了解。本文">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/10/31/App's ClassLoader的来源/"/>
+
+
+  <title> App's ClassLoader的来源 | 林江的笔记 </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">林江的笔记</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                App's ClassLoader的来源
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-10-31T10:00:00+08:00" content="2016-10-31">
+              2016-10-31
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/10/31/App's ClassLoader的来源/" class="leancloud_visitors" data-flag-title="App's ClassLoader的来源">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Java中每一个类都是通过ClassLoader来加载的。对于基于Java的Android应用，这些ClassLoader是从哪来的呢。研究过Android插件化机制的都知道Android中有<code>PathClassLoader</code>和<code>DexClassLoader</code>这两个类，它们的概念和区别也许我们已经很熟悉了，但是对为什么应用的类加载器是PathClassLoader，它是如何产生的这些问题却是不甚了解。本文就从应用的启动流程出发，来揭开ClassLoader的秘密。</p>
+<p>如果抛开底层原理不看，我们可以感知到的App启动的第一步大概就是<code>Application的onCreate</code>方法，因此我们先来看看Application类是如何加载进来的。</p>
+<h3 id="加载Application"><a href="#加载Application" class="headerlink" title="加载Application"></a>加载Application</h3><p>在该方法中加入下面这行代码来查看一下当前堆栈：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new Throwable().printStackTrace();</span><br></pre></td></tr></table></figure></p>
+<p>启动应用后，可以在logCat中看到如下信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">W/System.err: java.lang.Throwable</span><br><span class="line">             at com.demo.MyApplication.onCreate(MyApplication.java:12)</span><br><span class="line">             at android.app.Instrumentation.callApplicationOnCreate(Instrumentation.java:1013)</span><br><span class="line">             at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4707)</span><br><span class="line">             at android.app.ActivityThread.-wrap1(ActivityThread.java)</span><br><span class="line">             at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1405)</span><br><span class="line">             at android.os.Handler.dispatchMessage(Handler.java:102)</span><br><span class="line">             at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">             at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">             at java.lang.reflect.Method.invoke(Native Method)</span><br><span class="line">             at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:726)</span><br><span class="line">             at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:616)</span><br></pre></td></tr></table></figure></p>
+<p>方法间的调用链很清晰，在onCreate之前，从名字来看与<code>Application</code>类相关的调用最早是出现在<code>ActivityThread.handleBindApplication</code>这一行，那么我们就到ActivityThread的源码中去一探究竟。</p>
+<p>在ActivityThread类中大约4680行处，第一次发现了Application的身影，结合代码中的上下文，我们可以确信这就是我们日常开发中所熟悉的Application对象。可以看到，它是通过调用data.info的makeApplication方法来生成的，而这个 <code>data.info</code><br>是一个LoadedApk对象，LoadedApk表示，一个包对应一个LoadedApk对象（具体的可以自行深入了解）。先来看看这个data.info是什么时候生成的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Application app = data.info.makeApplication(data.restrictedBackupMode, null);</span><br></pre></td></tr></table></figure></p>
+<h4 id="data-info"><a href="#data-info" class="headerlink" title="data . info"></a>data . info</h4><p>往回查找，在大约4493行发现它被首次赋值：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);</span><br></pre></td></tr></table></figure></p>
+<p>从getPackageInfoNoCheck方法名就可以看出，它获取的应该是一个全新未缓存的LoadedApk对象，继续查看代码，其内部其实只是调用了getPackageInfo方法。</p>
+<p>果不其然，在该方法会首先去查找缓存，由于是第一次调用，所以未命中缓存，直接通过LoadedApk构造方法new了一个LoadedApk对象，并缓存至<code>mPackages</code>中。</p>
+<blockquote>
+<p>注意由于上面getPackageInfoNoCheck传入的ClassLoader为null，所以导致构造LoadedApk时传入的baseLoader也为null。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">final ArrayMap&lt;String, WeakReference&lt;LoadedApk&gt;&gt; mPackages = new ArrayMap&lt;String, WeakReference&lt;LoadedApk&gt;&gt;();</span><br><span class="line"></span><br><span class="line">private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,</span><br><span class="line">        ClassLoader baseLoader, boolean securityViolation, boolean includeCode,</span><br><span class="line">        boolean registerPackage) &#123;</span><br><span class="line">        //...</span><br><span class="line">        WeakReference&lt;LoadedApk&gt; ref;</span><br><span class="line">        //...</span><br><span class="line">        ref = mPackages.get(aInfo.packageName);</span><br><span class="line">        //...</span><br><span class="line">        LoadedApk packageInfo = ref != null ? ref.get() : null;</span><br><span class="line">        if (packageInfo == null || (packageInfo.mResources != null</span><br><span class="line">                &amp;&amp; !packageInfo.mResources.getAssets().isUpToDate())) &#123;</span><br><span class="line">            //...</span><br><span class="line">            packageInfo = new LoadedApk(this, aInfo, compatInfo, baseLoader,</span><br><span class="line">                        securityViolation, includeCode &amp;&amp;</span><br><span class="line">                        (aInfo.flags&amp;ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);</span><br><span class="line">                        </span><br><span class="line">            //...由于前面getPackageInfoNoCheck传给getPackageInfo的includeCode参数为true，所以放入缓存</span><br><span class="line">            else if (includeCode) &#123;</span><br><span class="line">                mPackages.put(aInfo.packageName, new WeakReference&lt;LoadedApk&gt;(packageInfo));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return packageInfo;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过getPackageInfoNoCheck拿到返回LoadedApk对象后，我们再回到最初的位置，来看看<code>LoadedApk#makeApplication</code>方法。</p>
+<h4 id="makeApplication"><a href="#makeApplication" class="headerlink" title="makeApplication"></a>makeApplication</h4><p>在LoadApk#makeApplication中，首先构造了Application的全包名字符串，并调用了方法getClassLoader得到ClassLoader的实例，然后调用了<code>mActivityThread.mInstrumentation.newApplication</code>方法传入classLoader参数，newApplication方法中通过cl.loadClass(className).newInstance()最终返回了Application实例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">// LoadedApk</span><br><span class="line">public Application makeApplication(boolean forceDefaultAppClass, Instrumentation instrumentation) &#123;</span><br><span class="line">    //...</span><br><span class="line">    String appClass = mApplicationInfo.className;</span><br><span class="line">    if (forceDefaultAppClass || (appClass == null)) &#123;</span><br><span class="line">        appClass = &quot;android.app.Application&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    //...</span><br><span class="line">    java.lang.ClassLoader cl = getClassLoader();</span><br><span class="line">    //...</span><br><span class="line">    ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);</span><br><span class="line">    app = mActivityThread.mInstrumentation.newApplication(cl, appClass, appContext);</span><br><span class="line">    appContext.setOuterContext(app);</span><br><span class="line">    //...</span><br><span class="line">&#125;</span><br><span class="line">// Instrumentation</span><br><span class="line">public Application newApplication(ClassLoader cl, String className, Context context)</span><br><span class="line">        throws InstantiationException, IllegalAccessException, </span><br><span class="line">        ClassNotFoundException &#123;</span><br><span class="line">    return newApplication(cl.loadClass(className), context);</span><br><span class="line">&#125;</span><br><span class="line">static public Application newApplication(Class&lt;?&gt; clazz, Context context)</span><br><span class="line">        throws InstantiationException, IllegalAccessException, ClassNotFoundException &#123;</span><br><span class="line">    Application app = (Application)clazz.newInstance();</span><br><span class="line">    app.attach(context);</span><br><span class="line">    return app;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>重点来了，上面说到最终加载并构造Application对象的这个ClassLoader是通过<code>LoadedApk#getClassLoader</code>得到的，我们看看它的源码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public ClassLoader getClassLoader() &#123;</span><br><span class="line">    synchronized (this) &#123;</span><br><span class="line">        if (mClassLoader != null) &#123;</span><br><span class="line">            return mClassLoader;</span><br><span class="line">        &#125;</span><br><span class="line">        if (mIncludeCode &amp;&amp; !mPackageName.equals(&quot;android&quot;)) &#123;</span><br><span class="line">            //...</span><br><span class="line">            mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, lib, mBaseClassLoader);</span><br><span class="line">            //...</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            if (mBaseClassLoader == null) &#123;</span><br><span class="line">                mClassLoader = ClassLoader.getSystemClassLoader();</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                mClassLoader = mBaseClassLoader;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return mClassLoader;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>很明显在第一次调用的时候缓存mClassLoader为null，同时<code>mIncludeCode</code>为true，并且我们的包名肯定也不是系统的包名，所以接下来直接调用的是<code>ApplicationLoaders.getDefault().getClassLoader</code>方法，该方法的流程为：当参数<code>parent==null || parent == baseParent</code>， 且<code>缓存无效</code>时，就会构建一个以BootClassLoader为parent，指向apk的PathClassLoader对象，在前面的分析中可知，构建LoadedApk对象时传入的baseLoader为null，所以LoadedApk的变量mBaseClassLoader也为null，最终导致ApplicationLoaders.getDefault().getClassLoader返回了一个全新的PathClassLoader对象。<code>ClassLoader.getSystemClassLoader()</code>的源码很简单，就是一个懒加载的单例，其parent为BootClassLoader，在此就不贴代码了。</p>
+<p>其实对于ApplicationLoaders，这也是唯一被调用的时机（即通过LodedApk#getClassLoader），每个App进程都有唯一的ApplicationLoaders实例，一个LoadedApk的ClassLoader一但创建，便会保存在ApplicationLoaders的mLoaders实例中，后续则通过apk路径查询返回。同时还可以得出一个结论，一个进程可以对应多个apk。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#ApplicationLoaders</span><br><span class="line">public ClassLoader getClassLoader(String zip, String libPath, ClassLoader parent) &#123;</span><br><span class="line">    ClassLoader baseParent = ClassLoader.getSystemClassLoader().getParent();</span><br><span class="line">    synchronized (mLoaders) &#123;</span><br><span class="line">        if (parent == null) &#123;</span><br><span class="line">            parent = baseParent;</span><br><span class="line">        &#125;</span><br><span class="line">        if (parent == baseParent) &#123;</span><br><span class="line">            ClassLoader loader = mLoaders.get(zip);</span><br><span class="line">            if (loader != null) &#123;</span><br><span class="line">                return loader;</span><br><span class="line">            &#125;</span><br><span class="line">            PathClassLoader pathClassloader = new PathClassLoader(zip, libPath, parent);</span><br><span class="line">            mLoaders.put(zip, pathClassloader);</span><br><span class="line">            return pathClassloader;</span><br><span class="line">        &#125;</span><br><span class="line">        PathClassLoader pathClassloader = new PathClassLoader(zip, parent);</span><br><span class="line">        return pathClassloader;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>到这里，Application的ClassLoader的来源我们也就清楚了，也解决了文中开头提到的为什么是PathClassLoader的问题。但是诸如Activity、Service等组件又是通过哪个ClassLoader加载进来的呢。</p>
+<h3 id="加载四大组件"><a href="#加载四大组件" class="headerlink" title="加载四大组件"></a>加载四大组件</h3><p>其实前面的分析流程来对Android四大组件的启动流程分析同样适用，最终都会走到在ActivityThread，分别通过<code>performLaunchActivity、handleCreateService、handleReceiver、installProvider</code>几个方法来启动的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</span><br><span class="line">        //...</span><br><span class="line">        Activity activity = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            java.lang.ClassLoader cl = r.packageInfo.getClassLoader();</span><br><span class="line">            activity = mInstrumentation.newActivity(cl, component.getClassName(), r.intent);</span><br><span class="line">            //...</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            //...</span><br><span class="line">        &#125;</span><br><span class="line">        //...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private void handleCreateService(CreateServiceData data) &#123;</span><br><span class="line">        //...</span><br><span class="line">        LoadedApk packageInfo = getPackageInfoNoCheck(data.info.applicationInfo, data.compatInfo);</span><br><span class="line">        Service service = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            java.lang.ClassLoader cl = packageInfo.getClassLoader();</span><br><span class="line">            service = (Service) cl.loadClass(data.info.name).newInstance();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            //...</span><br><span class="line">        &#125;</span><br><span class="line">        //...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private void handleReceiver(ReceiverData data) &#123;</span><br><span class="line">        //...</span><br><span class="line">        LoadedApk packageInfo = getPackageInfoNoCheck(data.info.applicationInfo, data.compatInfo);</span><br><span class="line">        //...</span><br><span class="line">        BroadcastReceiver receiver;</span><br><span class="line">        try &#123;</span><br><span class="line">            java.lang.ClassLoader cl = packageInfo.getClassLoader();</span><br><span class="line">            //...</span><br><span class="line">            receiver = (BroadcastReceiver)cl.loadClass(component).newInstance();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            //...</span><br><span class="line">        &#125;</span><br><span class="line">        //...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private IActivityManager.ContentProviderHolder installProvider(Context context,</span><br><span class="line">            IActivityManager.ContentProviderHolder holder, ProviderInfo info,</span><br><span class="line">            boolean noisy, boolean noReleaseNeeded, boolean stable) &#123;</span><br><span class="line">    ContentProvider localProvider = null;</span><br><span class="line">    IContentProvider provider;</span><br><span class="line">    if (holder == null || holder.provider == null) &#123;</span><br><span class="line">        //...</span><br><span class="line">        Context c = null;</span><br><span class="line">        //...</span><br><span class="line">        c = mInitialApplication;</span><br><span class="line">        //...</span><br><span class="line">        try &#123;</span><br><span class="line">            final java.lang.ClassLoader cl = c.getClassLoader();</span><br><span class="line">            localProvider = (ContentProvider)cl.loadClass(info.name).newInstance();</span><br><span class="line">            provider = localProvider.getIContentProvider();</span><br><span class="line">            //...</span><br><span class="line">        &#125; catch (java.lang.Exception e) &#123;</span><br><span class="line">            //...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        //...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面的代码可以得到，这些方法中，最终都会直接/间接通过<code>LoadedApk#getClassLoader</code>来加载相应的类，这里的LoadedApk对象则是handleBindApplication流程期间生成并保存到ActivityThread的mPackages中的缓存，而每个App在启动时都会经历handleBindApplication流程，所以最终可以得出的结论就是加载四大组件的ClassLoader与Application的ClassLoader是同一个类加载器并且它是PathClassLoader对象。</p>
+<h3 id="加载普通类"><a href="#加载普通类" class="headerlink" title="加载普通类"></a>加载普通类</h3><p>加载Application和四大组件的ClassLoader我们已经知道了，那么应用中自行编写的其它普通类又是通过哪个ClassLoader加载进来的呢？其实这个问题属于Java类加载机制的一部分。在一个类A中如果使用到了类B，都会直接或间接的通过new关键字或者Class.forName.newInstance显式地获得B的对象，在B类未加载的前提下，两种方式都会触发加载B类。如果我们深究其原理和区别，可以再写一篇文章了，这里直接抛出简要说明，我们可以把new关键字当做forName和newInstance两个步骤的集合，在调用Class.forName时，默认调用了以下方法作为将要加载的类的类加载器:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// Returns the defining class loader of the caller&apos;s caller.</span><br><span class="line">VMStack.getCallingClassLoader()</span><br></pre></td></tr></table></figure></p>
+<p>由注释可知，该方法获取的是当前栈caller’s caller的类加载器，对于上面的AB例子，那么返回的就是加载A的类加载器。也就是说，普通类的加载是通过调用该类的caller类的类加载器来完成的。由于整个应用默认的初始类加载器是PathClassLoader，那么通过Application和四大组件引用到的其它普通类的类加载器也都是PathClassLoader。</p>
+<h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h3><p>本文结合Application和四大组件以及普通类是如何加载的问题来分析了Android应用的类加载器的来源。了解Android中的类加载器的来源可以让我们更清楚Android应用的所有类的是如何加载进来的；在对自定义类加载器中，对如何修改加载流程来达到应用的热更新和插件化目的的也有明显的帮助。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ClassLoader/" rel="tag">#ClassLoader</a>
+          
+            <a href="/tags/Hotfix-Plugin/" rel="tag">#Hotfix&Plugin</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/26/多手指Touch变化处理原则基础/" rel="next" title="多手指Touch变化处理原则基础">
+                <i class="fa fa-chevron-left"></i> 多手指Touch变化处理原则基础
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/30/Android Studio Patches Update/" rel="prev" title="以Patch的形式更新Android Studio">
+                以Patch的形式更新Android Studio <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+         <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/my_avatar.jpg"
+               alt="林江" />
+          <p class="site-author-name" itemprop="name">林江</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/whataa" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://sighttp.qq.com/msgrd?v=3&uin=837979117&site=&menu=yes" target="_blank" title="QQ">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  QQ
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#加载Application"><span class="nav-number">1.</span> <span class="nav-text">加载Application</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#data-info"><span class="nav-number">1.1.</span> <span class="nav-text">data . info</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#makeApplication"><span class="nav-number">1.2.</span> <span class="nav-text">makeApplication</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加载四大组件"><span class="nav-number">2.</span> <span class="nav-text">加载四大组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加载普通类"><span class="nav-number">3.</span> <span class="nav-text">加载普通类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结语"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">林江</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<span id="busuanzi_container_site_pv">
+    &nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;总访问: <span id="busuanzi_value_site_pv"></span>次
+</span>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+    
+  
+
+ 
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2141965"></script>
+      <!-- UY END -->
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("lTrcHfqk0M08SqMAmNgd7tOc-gzGzoHsz", "yazrWiRSI4OOHXlGROJalqBk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+
+  
+
+
+</body>
+</html>
